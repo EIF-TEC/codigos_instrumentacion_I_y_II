@@ -1,0 +1,1 @@
+writematrix(transpose(out.text),'datos.csv')
