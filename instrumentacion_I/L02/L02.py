@@ -1,29 +1,38 @@
 import serial
-import csv
-from datetime import datetime
+import numpy as np
+import matplotlib.pyplot as plt
 
 arduino = serial.Serial('COM8', 9600)
-nombre = "term"
-narchivo = 1
-mediciones = 20
+fs = 10          # muestras por segundo
+duracion = 20     # segundos
+mediciones = fs * duracion  # 200 lecturas
 
-datos = []
+datos = {"R": [], "T1": []}
 
 arduino.write(b'0')
 
 for i in range(mediciones):
     dato = arduino.readline()[:-2].decode('utf-8').split(',')
     print(dato)
-    datos.append([datetime.now().strftime(format="%Y-%m-%d %H:%M:%S"),
-                  float(dato[0]),
-                  float(dato[1]),
-                  float(dato[2])])
+    datos["R"].append(float(dato[0]))
+    datos["T1"].append(float(dato[1]))
 
+tiempo = np.arange(mediciones) / fs
 
-# Guardar en CSV
-with open(f"{nombre}_{narchivo}.csv", "w", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerow(["timestamp", "R", "T1", "T2"])  # encabezados
-    writer.writerows(datos)
+for variable, valores in datos.items():
+    valores = np.array(valores)
+    promedio = valores.mean()
+    desv_std = valores.std()
+    print(f"{variable}: promedio = {promedio:.4f}, desviación estándar = {desv_std:.4f}")
 
-print("Datos guardados en el archivo .csv")
+    plt.figure()
+    plt.plot(tiempo, valores, '-', label="Lecturas")
+    plt.axhline(promedio, color='r', linestyle='--', label="Promedio")
+    plt.fill_between(tiempo, promedio - desv_std, promedio + desv_std,
+                      color='r', alpha=0.2, label="Promedio ± desv. estándar")
+    plt.xlabel("Tiempo (s)")
+    plt.ylabel(variable)
+    plt.title(f"{variable}: {mediciones} lecturas en {duracion} s ({fs} muestras/s)")
+    plt.legend()
+
+plt.show()
