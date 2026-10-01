@@ -1,55 +1,32 @@
-#include "HX711.h"
+/*
+ * Nivel
+*/
 
-HX711 scale;
+const int trigPin = 9;
+const int echoPin = 10;
 
-#define DATAPIN 6 
-#define CLOCKPIN 7
+float duration, distance, volume;
 
-void setup()
-{
-  Serial.begin(115200);
-  delay(1000);
-
-  scale.begin(DATAPIN, CLOCKPIN);
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
 }
 
+void loop() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
 
-String input = "a";
-String maxt = "500";
-int maxn = 500;
-float value = 0.0;
-float units = 0.0;
-
-
-void loop()
-{
-  value = scale.get_value(2);
-  units = scale.get_units(10);
-  Serial.print(value);
-  Serial.print(",");
-  Serial.println(units);
-  delay(250);
-  while(Serial.available()) input = Serial.readStringUntil('\n');
-  if (input == "c") {
-    Serial.println("***Calibration***");
-    Serial.println("\nEmpty the scale, press a key to continue");
-    while(!Serial.available());
-    while(Serial.available()) Serial.read();
-    scale.tare();
-    Serial.print("Weight: ");
-    Serial.println(scale.get_units(10));
-    Serial.println("\nSet max weight");
-    while(!Serial.available());
-    while(Serial.available()) maxt = Serial.readStringUntil('\n');
-    maxn = maxt.toInt();
-    Serial.print("\nPut ");
-    Serial.print(maxn);
-    Serial.println(" gram in the scale, press a key to continue");
-    while(!Serial.available());
-    while(Serial.available()) Serial.read();
-    scale.calibrate_scale(maxn, 10);
-    Serial.print("Weight: ");
-    Serial.println(scale.get_units(10));   
-    input = "n";
-  }
+  duration = pulseIn(echoPin, HIGH);
+  distance = (duration*.0343)/2;
+  // distance = 7.96 - distance;
+  // volume = 32.05 * distance + 29.492;
+  Serial.print("H: ");
+  Serial.println(distance);
+  // Serial.print(" V:");
+  // Serial.println(volume);
+  delay(100);
 }

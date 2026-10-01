@@ -13,7 +13,7 @@ un solo lugar, en lugar de mantener copias duplicadas en cada repositorio.
 
 ```
 instrumentacion_I/
-    L01/ ... L06a/    Código de cada práctica (Arduino .ino + Python .py)
+    L02/ ... L06/     Código de cada práctica (Arduino .ino + Python .py)
     distancia/        Ejemplo adicional (sensor de distancia)
     BMP280_wire/      Ejemplo adicional (BMP280 por I2C)
     data.csv          Datos de ejemplo
